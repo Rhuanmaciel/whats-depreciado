@@ -1,0 +1,36 @@
+from pymongo import MongoClient
+
+def create_database_and_collection():
+    # URI do MongoDB local
+    uri = "mongodb://localhost:27017"
+    
+    # Conectar ao MongoDB
+    client = MongoClient(uri)
+    
+    # Criar banco de dados 'botDatabase'
+    db = client.botDatabase
+    
+    # Criar coleção 'contacts'
+    collection = db.contacts
+    
+    # Verificar se a coleção já contém documentos
+    if collection.count_documents({}) == 0:
+        # Estrutura do documento a ser inserido
+        document = {
+            "contactId": "",
+            "state": "initial",
+            "planDescription": "",
+            "transactionId": "",
+            "transactionAmount": 0
+        }
+        
+        # Inserir o documento na coleção
+        result = collection.insert_one(document)
+        
+        # Exibir ID do documento inserido
+        print(f"Documento de estrutura inserido com o ID: {result.inserted_id}")
+    else:
+        print("A coleção já contém documentos. Nenhum documento foi inserido.")
+
+if __name__ == "__main__":
+    create_database_and_collection()
