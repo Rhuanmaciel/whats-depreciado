@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 3008;
 // Fluxo de boas-vindas
 const welcomeFlow = addKeyword(['hi', 'hello', 'hola'])
     .addAnswer([
-        'Olá, bem-vindo à maior plataforma de OnlyFans e Privacy do Brasil!',
+        'Olá, bem-vindo!',
         'Digite a opção que deseja:',
         'Planos',
         'Encerrar contato',
