@@ -1,11 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
-import { createBot, createProvider, createFlow, addKeyword, EVENTS } from '@builderbot/bot';
-import { MongoAdapter as Database } from '@builderbot/database-mongo';
-import { BaileysProvider as Provider } from '@builderbot/provider-baileys';
-import { createPixPayment, verifyPayment } from './mercadopago.js';
-
-const PORT = process.env.PORT || 3008;
+import { createFlow, addKeyword } from '@builderbot/bot';
+import { verifyPayment } from './functions/mercadopago.js';
+import { createPix } from './functions/createpix.js';
 
 // Fluxo de boas-vindas
 const welcomeFlow = addKeyword(['hi', 'hello', 'hola'])
@@ -14,6 +11,7 @@ const welcomeFlow = addKeyword(['hi', 'hello', 'hola'])
         'Digite a opção que deseja:',
         'Planos',
         'Encerrar contato',
+        'Verificar pagamento',
         'Suporte'
     ]);
 
@@ -51,7 +49,7 @@ const plansFlow = addKeyword(['planos'])
                     amount = 30;
                     break;
                 default:
-                    return flowDynamic('Opção inválida. Digite novamente.');
+                    return await flowDynamic('Opção inválida. Digite novamente.');
             }
             await state.update({ plan, amount });
             await flowDynamic([
@@ -65,49 +63,19 @@ const plansFlow = addKeyword(['planos'])
 
 // Fluxo para confirmar o pagamento
 const confirmFlow = addKeyword(['confirmar'])
-    .addAnswer(
-        'Abaixo segue o PIX copia e cola, copie ele e pague pelo seu banco!',
-        { capture: true },
-        async (ctx, { flowDynamic, state }) => {
-            if (ctx.body.toLowerCase().trim() === 'confirmar') {
-                console.log('Confirmação recebida'); 
-
-                const { amount } = state.get();
-                console.log('Valor da transação antes do parse:', amount); // Log do valor antes do parse
-
-                // Certifique-se de que o valor seja numérico
-                const parsedAmount = parseFloat(amount);
-
-                if (isNaN(parsedAmount)) {
-                    console.error('Erro: valor da transação inválido.');
-                    return flowDynamic('Erro ao processar seu pedido. Por favor, tente novamente.');
-                }
-
-                console.log('Valor da transação após o parse:', parsedAmount); // Log do valor após o parse
-
-                try {
-                    console.log('Chamando createPixPayment...');
-                    const { transactionId, pix } = await createPixPayment(parsedAmount, 'email@example.com', '12345678900'); 
-                    console.log('PIX gerado:', pix); 
-                    console.log('ID da transação:', transactionId); 
-
-                    await state.update({ transactionId });
-                    await flowDynamic([
-                        `PIX copia e cola: ${pix}`, 
-                        `Abaixo o seu id da transação: ${transactionId}`,
-                        'Digite 0 pra confirmar o pagamento'
-                    ]);
-                } catch (error) {
-                    console.error('Erro ao gerar o PIX:', error.message); 
-                    console.error('Detalhes do erro:', error.response ? error.response.data : error); // Log da resposta da API
-                    await flowDynamic('Erro ao gerar o PIX. Tente novamente ou entre em contato com o suporte.');
-                }
-            } 
+    .addAction(
+        async (ctx, { flowDynamic, state, gotoFlow }) => {
+            console.log('Recebeu mensagem:', ctx.body); // Log da mensagem recebida
+            if (state.get('amount')) {
+                await createPix(flowDynamic, state);
+            } else {
+                return gotoFlow(welcomeFlow);
+            }
         }
     );
 
 // Fluxo para verificar o pagamento
-const verifyFlow = addKeyword(['0'])
+const verifyFlow = addKeyword(['verificar pagamento'])
     .addAnswer(
         'Digite o número do id da transação para confirmar o pagamento',
         { capture: true },
@@ -117,7 +85,7 @@ const verifyFlow = addKeyword(['0'])
             try {
                 const approved = await verifyPayment(transactionId);
                 if (approved) {
-                    const { plan } = state.get();
+                    const plan = state.get('plan');
                     await flowDynamic(
                         `Parabéns, você adquiriu o plano ${plan}. Segue abaixo o seu link único do grupo no Telegram (cuidado com ele, você só consegue usar uma vez).`
                     );
@@ -152,7 +120,7 @@ const supportFlow = addKeyword(['suporte'])
     });
 
 // Combina todos os fluxos
-const adapterFlow = createFlow([
+export const adapterFlow = createFlow([
     welcomeFlow,
     plansFlow,
     confirmFlow,
@@ -160,30 +128,3 @@ const adapterFlow = createFlow([
     endFlow,
     supportFlow
 ]);
-
-const main = async () => {
-    const adapterProvider = createProvider(Provider);
-    const adapterDB = new Database({
-        dbUri: process.env.MONGO_DB_URI,
-        dbName: process.env.MONGO_DB_NAME,
-    });
-
-    const { handleCtx, httpServer } = await createBot({
-        flow: adapterFlow,
-        provider: adapterProvider,
-        database: adapterDB,
-    });
-
-    adapterProvider.server.post(
-        '/v1/messages',
-        handleCtx(async (bot, req, res) => {
-            const { number, message, urlMedia } = req.body;
-            await bot.sendMessage(number, message, { media: urlMedia ?? null });
-            return res.end('sended');
-        })
-    );
-
-    httpServer(+PORT);
-}
-
-main();

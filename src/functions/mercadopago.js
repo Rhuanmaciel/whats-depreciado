@@ -10,7 +10,7 @@ const baseURL = 'https://api.mercadopago.com/v1/payments';
  * @param {number|string} transactionAmount - Valor da transação.
  * @returns {Promise<{transactionId: string, pix: string}>} - ID da transação e código QR do PIX.
  */
-export async function createPixPayment(transactionAmount, payerEmail, payerDocument) {
+export async function createPixPayment(transactionAmount) {
     try {
         const idempotencyKey = uuidv4();
         const paymentData = {

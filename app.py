@@ -2,7 +2,7 @@ from pymongo import MongoClient
 
 def create_database_and_collection():
     # URI do MongoDB local
-    uri = "mongodb://localhost:27017"
+    uri = ""
     
     # Conectar ao MongoDB
     client = MongoClient(uri)
