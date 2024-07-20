@@ -3,6 +3,8 @@ dotenv.config();
 import { createFlow, addKeyword } from '@builderbot/bot';
 import { verifyPayment } from './functions/mercadopago.js';
 import { createPix } from './functions/createpix.js';
+import { generateTelegramLink } from './functions/telegramHandler.js';
+
 
 // Fluxo de boas-vindas
 const welcomeFlow = addKeyword(['hi', 'hello', 'hola'])
@@ -86,9 +88,16 @@ const verifyFlow = addKeyword(['verificar pagamento'])
                 const approved = await verifyPayment(transactionId);
                 if (approved) {
                     const plan = state.get('plan');
-                    await flowDynamic(
-                        `Parabéns, você adquiriu o plano ${plan}. Segue abaixo o seu link único do grupo no Telegram (cuidado com ele, você só consegue usar uma vez).`
-                    );
+                    const telegramLink = await generateTelegramLink();
+                    if (telegramLink) {
+                        await flowDynamic(
+                            `Parabéns, você adquiriu o plano ${plan}. Segue abaixo o seu link único do grupo no Telegram (cuidado com ele, você só consegue usar uma vez):\n${telegramLink}`
+                        );
+                    } else {
+                        await flowDynamic(
+                            `Parabéns, você adquiriu o plano ${plan}. No entanto, estamos enfrentando dificuldades para gerar o link do Telegram. Por favor, entre em contato com o suporte para receber seu link.`
+                        );
+                    }
                 } else {
                     throw new Error('Pagamento não aprovado');
                 }
@@ -105,9 +114,8 @@ const verifyFlow = addKeyword(['verificar pagamento'])
                 }
             }
         }
-    );
+    )
 
-// Fluxo de encerramento de contato
 const endFlow = addKeyword(['encerrar contato'])
     .addAnswer('Seu contato foi encerrado', async (ctx, { state }) => {
         state.reset();
