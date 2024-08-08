@@ -5,13 +5,27 @@ import { verifyPayment } from './functions/mercadopago.js';
 import { createPix } from './functions/createpix.js';
 import { generateTelegramLink } from './functions/telegramHandler.js';
 
-
 // Fluxo de boas-vindas
 const welcomeFlow = addKeyword(['hi', 'hello', 'hola'])
     .addAnswer([
         'Olá, bem-vindo!',
         'Digite a opção que deseja:',
         'Planos',
+        'MINI VIP',
+        'Encerrar contato',
+        'Verificar pagamento',
+        'Suporte'
+    ]);
+
+// Fluxo para o MINI VIP
+const miniVipFlow = addKeyword(['mini vip'])
+    .addAnswer(
+        'O mini vip é um vip menor do que o vip normal, a ideia dele é ser mais acessível, contendo as modelos mais famosas. Ele é vitalício e novas modelos serão adicionadas toda semana, 1 por semana.'
+    )
+    .addAnswer([
+        'Digite a opção que deseja:',
+        'Planos',
+        'MINI VIP',
         'Encerrar contato',
         'Verificar pagamento',
         'Suporte'
@@ -22,10 +36,13 @@ const plansFlow = addKeyword(['planos'])
     .addAnswer(
         [
             'Escolha um plano:',
-            '1 - Mensal R$ 10',
-            '2 - Trimestral R$ 15',
-            '3 - Semestral R$ 20',
-            '4 - Vitalício R$ 30',
+            '1 - Mini VIP (Vitalício) R$ 7',
+            '--------------------------------',
+            '2 - (VIP Completo) Mensal R$ 20',
+            '3 - (VIP Completo) Vitalício R$ 30',
+            '',
+            'Economize R$ 200 em um ano escolhendo o VIP Completo Vitalício',
+            'Digite "MINI VIP" para conhecer o MINI VIP',
             'Digite o Número da opção que você deseja'
         ],
         { capture: true },
@@ -33,23 +50,21 @@ const plansFlow = addKeyword(['planos'])
             console.log('Recebeu mensagem:', ctx.body); // Log da mensagem recebida
             const message = ctx.body.trim();
             let plan, amount;
-            switch (message) {
+            switch (message.toLowerCase()) {
                 case '1':
-                    plan = 'Mensal';
-                    amount = 10;
+                    plan = 'Mini VIP';
+                    amount = 7;
                     break;
                 case '2':
-                    plan = 'Trimestral';
-                    amount = 15;
-                    break;
-                case '3':
-                    plan = 'Semestral';
+                    plan = 'Mensal (VIP Completo)';
                     amount = 20;
                     break;
-                case '4':
-                    plan = 'Vitalício';
+                case '3':
+                    plan = 'Vitalício (VIP Completo)';
                     amount = 30;
                     break;
+                case 'mini vip':
+                    return await ctx.gotoFlow(miniVipFlow); // Redireciona para o fluxo do Mini VIP
                 default:
                     return await flowDynamic('Opção inválida. Digite novamente.');
             }
@@ -130,6 +145,7 @@ const supportFlow = addKeyword(['suporte'])
 // Combina todos os fluxos
 export const adapterFlow = createFlow([
     welcomeFlow,
+    miniVipFlow,
     plansFlow,
     confirmFlow,
     verifyFlow,
