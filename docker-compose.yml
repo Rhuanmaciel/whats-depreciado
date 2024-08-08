@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - MONGO_DB_URI=mongodb://mongodb:27017/botDatabase
+      - MONGO_DB_NAME=botDatabase
+      - PORT=${PORT}
+      - TELEGRAM_CHAT_ID=-1002227765834
+      - TELEGRAM_BOT_TOKEN=7409295051:AAE5uJbW-QBlkygyYpT7jvl-1ueFuYyU_s4
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

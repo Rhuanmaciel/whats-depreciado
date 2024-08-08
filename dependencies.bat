@@ -13,6 +13,8 @@ echo Installing sharp for win32 x64... && ^
 npm install --os=win32 --cpu=x64 sharp && ^
 echo Installing sharp for wasm32... && ^
 npm install --cpu=wasm32 sharp
+echo Installing mongodb... && ^
+npm install mongodb
 
 echo All dependencies installed.
 pause

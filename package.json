@@ -6,8 +6,11 @@
   "type": "module",
   "scripts": {
     "lint": "eslint . --no-ignore",
-    "dev": "npm run lint && nodemon ./src/server.js",
-    "start": "node ./src/server.js"
+    "dev": "npm lint && nodemon ./src/server.js",
+    "start": "node ./src/server.js",
+    "testpix": "node ./src/functions/testPixPayment.js",
+    "verify": "node ./src/functions/testVerifyPayment.js",
+    "runtelegram": "node ./src/functions/testtelegram.js"
   },
   "keywords": [],
   "dependencies": {
@@ -16,12 +19,16 @@
     "@builderbot/provider-baileys": "^1.1.7",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
+    "mongodb": "^6.8.0",
     "sharp": "^0.33.4",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
+    "@babel/preset-env": "^7.25.3",
+    "babel-jest": "^29.7.0",
+    "eslint": "^9.7.0",
     "eslint-plugin-builderbot": "latest",
+    "jest": "^29.7.0",
     "nodemon": "^3.1.0"
   },
   "author": "",

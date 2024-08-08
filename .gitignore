@@ -1,13 +1,26 @@
-dist/*
+# Diretórios e arquivos a serem ignorados
+
+# Diretórios de distribuição
+dist/
+
+# Arquivo de configuração
 .env
 
+# Sessões e tokens
 *_sessions
 *tokens
+
+# Arquivos específicos
 .wwebjs*
 
+# Logs
 *.log
+
+# QR Codes
 *qr.png
 
-*node_modules
+# Diretórios e arquivos de dependências
+node_modules/
 
-*yarn.lock
+# Arquivo de bloqueio do Yarn
+yarn.lock

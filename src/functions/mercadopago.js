@@ -18,10 +18,10 @@ export async function createPixPayment(transactionAmount) {
             description: 'Pagamento via PIX',
             payment_method_id: 'pix',
             payer: {
-                email: 'rhuanc01@gmail.com',
+                email: 'exemple@exemple.com',
                 identification: {
                     type: 'CPF',
-                    number: '52788947844'
+                    number: '37980966864'
                 }
             }
         };

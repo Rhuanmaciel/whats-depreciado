@@ -3,7 +3,7 @@ import { createPixPayment, verifyPayment } from './mercadopago.js'; // Certifiqu
 async function testPixPayment() {
     const transactionAmount = 100.00; // Valor da transação
     const payerEmail = 'email@exemplo.com'; // Email do pagador
-    const payerDocument = '12345678901'; // CPF do pagador
+    const payerDocument = '37980966864'; // CPF do pagador
 
     try {
         // Gerar pagamento PIX

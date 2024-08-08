@@ -105,7 +105,7 @@ const verifyFlow = addKeyword(['verificar pagamento'])
                 if (attempts < 2) {
                     await state.update({ attempts: attempts + 1 });
                     await flowDynamic(
-                        'Seu pagamento não foi aprovado. Digite novamente o id da transação ou digite "Suporte" para falar com o suporte.'
+                        'Seu pagamento não foi aprovado. Digite novamente "verificar pagamento" ou digite "Suporte" para falar com o suporte.'
                     );
                 } else {
                     await flowDynamic(
